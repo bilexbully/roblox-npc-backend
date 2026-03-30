@@ -3,8 +3,10 @@ const app = express();
 
 app.use(express.json());
 
+// Use environment variable (SAFE)
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
+// Chat endpoint
 app.post("/chat", async (req, res) => {
   const message = req.body.message;
 
@@ -20,7 +22,7 @@ app.post("/chat", async (req, res) => {
         messages: [
           {
             role: "system",
-            content: "You are a stoic and unfazed Roblox NPC. Give short but uncaring responses."
+            content: "You are a funny Roblox NPC. Keep responses short and entertaining."
           },
           {
             role: "user",
@@ -32,22 +34,30 @@ app.post("/chat", async (req, res) => {
 
     const data = await response.json();
 
-    const reply =
-      data.choices?.[0]?.message?.content ||
-      "I have nothing to say right now...";
+    // 🔍 DEBUG (VERY IMPORTANT)
+    console.log("FULL OPENAI RESPONSE:", JSON.stringify(data, null, 2));
+
+    // Handle errors properly
+    if (!data.choices) {
+      return res.json({ reply: "AI error: no choices returned" });
+    }
+
+    const reply = data.choices[0].message.content;
 
     res.json({ reply });
 
   } catch (error) {
-    console.error("Error:", error);
-    res.json({ reply: "Something went wrong..." });
+    console.error("ERROR:", error);
+    res.json({ reply: "Something broke on the server" });
   }
 });
 
+// Test route
 app.get("/", (req, res) => {
   res.send("Server is running");
 });
 
+// Start server
 app.listen(3000, () => {
   console.log("Server running on port 3000");
 });
